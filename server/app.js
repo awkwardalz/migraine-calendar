@@ -15,6 +15,8 @@ const allowedOrigins = process.env.CLIENT_ORIGIN
 app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
+app.get('/api/health', (_req, res) => res.json({ ok: true, ts: Date.now() }));
+
 app.use('/api/auth', authRoutes);
 app.use('/api/headaches', headacheRoutes);
 app.use('/api/preventive', preventiveRoutes);

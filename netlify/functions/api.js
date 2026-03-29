@@ -14,9 +14,18 @@ let dbInitialized = false;
 const wrapped = serverless(app);
 
 export const handler = async (event, context) => {
-  if (!dbInitialized) {
-    await initDB();
-    dbInitialized = true;
+  try {
+    if (!dbInitialized) {
+      await initDB();
+      dbInitialized = true;
+    }
+    return await wrapped(event, context);
+  } catch (err) {
+    console.error('[api] handler error:', err);
+    return {
+      statusCode: 500,
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ error: err.message, stack: err.stack }),
+    };
   }
-  return wrapped(event, context);
 };
