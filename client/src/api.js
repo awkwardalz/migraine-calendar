@@ -43,6 +43,8 @@ export const api = {
 
   getStats: () => request('/stats'),
 
+  getReport: (from, to) => request(`/stats/report?from=${from}&to=${to}`),
+
   getPeriods: () => request('/period'),
   getPeriodById: (id) => request(`/period/${id}`),
   createPeriod: (data) => request('/period', { method: 'POST', body: JSON.stringify(data) }),

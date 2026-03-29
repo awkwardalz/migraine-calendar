@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import db from '../db.js';
+import { authenticateToken } from '../middleware/auth.js';
 
 const router = Router();
 
@@ -56,6 +57,76 @@ router.get('/', async (req, res) => {
   } catch (err) {
     console.error('Stats error:', err);
     res.status(500).json({ error: 'Failed to load stats' });
+  }
+});
+
+// GET /api/stats/report?from=YYYY-MM-DD&to=YYYY-MM-DD
+router.get('/report', authenticateToken, async (req, res) => {
+  try {
+    const { from, to } = req.query;
+    if (!from || !to || !/^\d{4}-\d{2}-\d{2}$/.test(from) || !/^\d{4}-\d{2}-\d{2}$/.test(to)) {
+      return res.status(400).json({ error: 'from and to (YYYY-MM-DD) are required' });
+    }
+
+    const parseEntry = (e) => ({
+      ...e,
+      pain_location: JSON.parse(e.pain_location || '[]'),
+      pain_area: JSON.parse(e.pain_area || '[]'),
+      medications: JSON.parse(e.medications || '[]'),
+      symptoms: JSON.parse(e.symptoms || '[]'),
+      triggers: JSON.parse(e.triggers || '[]'),
+    });
+
+    const headaches = (await db.execute({
+      sql: 'SELECT * FROM headache_entries WHERE date BETWEEN ? AND ? ORDER BY date',
+      args: [from, to],
+    })).rows.map(parseEntry);
+
+    const preventive = (await db.execute({
+      sql: 'SELECT * FROM preventive_medications WHERE date BETWEEN ? AND ? ORDER BY date',
+      args: [from, to],
+    })).rows;
+
+    const periods = (await db.execute({
+      sql: 'SELECT * FROM period_entries WHERE start_date BETWEEN ? AND ? ORDER BY start_date',
+      args: [from, to],
+    })).rows;
+
+    // Summary stats for the range
+    const totalDays = Math.round((new Date(to) - new Date(from)) / 86400000) + 1;
+    const avgIntensity = headaches.length
+      ? (headaches.reduce((s, e) => s + (e.intensity || 0), 0) / headaches.length).toFixed(1)
+      : null;
+
+    const symptomCounts = {};
+    const triggerCounts = {};
+    const locationCounts = {};
+    const medCounts = {};
+    headaches.forEach(e => {
+      e.symptoms.forEach(s => { symptomCounts[s] = (symptomCounts[s] || 0) + 1; });
+      e.triggers.forEach(t => { triggerCounts[t] = (triggerCounts[t] || 0) + 1; });
+      e.pain_location.forEach(l => { locationCounts[l] = (locationCounts[l] || 0) + 1; });
+      e.medications.forEach(m => { medCounts[m.name] = (medCounts[m.name] || 0) + (m.quantity || 1); });
+    });
+
+    res.json({
+      from, to, totalDays,
+      headaches,
+      preventive,
+      periods,
+      summary: {
+        migraineDays: headaches.length,
+        migraineFreeDays: totalDays - headaches.length,
+        avgIntensity,
+        symptomCounts,
+        triggerCounts,
+        locationCounts,
+        medCounts,
+      },
+    });
+  } catch (err) {
+    console.error('Report error:', err);
+    res.status(500).json({ error: 'Failed to generate report' });
   }
 });
 

@@ -2,7 +2,7 @@
 
 A personal migraine headache tracking web app with calendar visualization, statistical insights, and medication logging.
 
-**Live site:** [migraine-calendar on Netlify](https://awkwardalz.netlify.app) *(replace with your URL)*
+**Live site:** [migraine-calendar on Netlify](https://migraine-calendar.netlify.app/)
 
 ## Features
 

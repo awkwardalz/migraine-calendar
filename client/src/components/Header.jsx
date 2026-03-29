@@ -44,6 +44,7 @@ export default function Header() {
               {!isGuest && <Link to="/preventive" className="nav-link">💊</Link>}
               {!isGuest && <Link to="/period" className="nav-link">🩸</Link>}
               <Link to="/history" className="nav-link">📝</Link>
+              <Link to="/report" className="nav-link">📄</Link>
             </>
           )}
         </nav>

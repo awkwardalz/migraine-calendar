@@ -7,6 +7,7 @@ import HeadacheForm from './components/HeadacheForm';
 import PreventiveForm from './components/PreventiveForm';
 import PeriodForm from './components/PeriodForm';
 import History from './components/History';
+import Report from './components/Report';
 import './App.css';
 
 function ProtectedRoute({ children }) {
@@ -38,6 +39,7 @@ function AppRoutes() {
           <Route path="/period" element={<AdminRoute><PeriodForm /></AdminRoute>} />
           <Route path="/period/:id" element={<AdminRoute><PeriodForm /></AdminRoute>} />
           <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
+          <Route path="/report" element={<ProtectedRoute><Report /></ProtectedRoute>} />
         </Routes>
       </main>
     </div>
