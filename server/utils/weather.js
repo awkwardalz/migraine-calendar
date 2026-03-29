@@ -8,14 +8,14 @@ export function weatherLabel(code) {
   if (code === 0)  return { icon: '\u2600\ufe0f', label: 'Clear' };
   if (code <= 2)   return { icon: '\u26c5', label: 'Partly cloudy' };
   if (code === 3)  return { icon: '\u2601\ufe0f', label: 'Overcast' };
-  if (code <= 49)  return { icon: '\U0001f32b\ufe0f', label: 'Foggy' };
-  if (code <= 59)  return { icon: '\U0001f326\ufe0f', label: 'Drizzle' };
-  if (code <= 69)  return { icon: '\U0001f327\ufe0f', label: 'Rain' };
-  if (code <= 79)  return { icon: '\U0001f328\ufe0f', label: 'Snow' };
-  if (code <= 82)  return { icon: '\U0001f327\ufe0f', label: 'Showers' };
-  if (code <= 84)  return { icon: '\U0001f328\ufe0f', label: 'Snow showers' };
+  if (code <= 49)  return { icon: '\u{1f32b}\ufe0f', label: 'Foggy' };
+  if (code <= 59)  return { icon: '\u{1f326}\ufe0f', label: 'Drizzle' };
+  if (code <= 69)  return { icon: '\u{1f327}\ufe0f', label: 'Rain' };
+  if (code <= 79)  return { icon: '\u{1f328}\ufe0f', label: 'Snow' };
+  if (code <= 82)  return { icon: '\u{1f327}\ufe0f', label: 'Showers' };
+  if (code <= 84)  return { icon: '\u{1f328}\ufe0f', label: 'Snow showers' };
   if (code <= 99)  return { icon: '\u26c8\ufe0f', label: 'Thunderstorm' };
-  return { icon: '\U0001f321\ufe0f', label: 'Unknown' };
+  return { icon: '\u{1f321}\ufe0f', label: 'Unknown' };
 }
 
 export async function fetchAndCacheWeather(dateStr, force = false) {
