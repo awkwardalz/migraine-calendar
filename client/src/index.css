@@ -1,0 +1,60 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+:root {
+  --bg:            #0d0f14;
+  --bg-raised:     #13161e;
+  --card:          #181c26;
+  --card-hover:    #1e2230;
+  --border:        #252a38;
+  --border-bright: #353d54;
+
+  --primary:       #7c6fef;
+  --primary-dim:   #5a4fd4;
+  --primary-glow:  rgba(124, 111, 239, 0.18);
+
+  --danger:        #f06060;
+  --danger-dim:    rgba(240, 96, 96, 0.12);
+  --success:       #4dd9c0;
+  --success-dim:   rgba(77, 217, 192, 0.12);
+  --warning:       #f0b860;
+  --warning-dim:   rgba(240, 184, 96, 0.12);
+
+  --period:        #e879a0;
+  --period-dim:    rgba(232, 121, 160, 0.15);
+  --fertile:       rgba(150, 200, 255, 0.08);
+  --ovulation:     #60c8f0;
+  --ovulation-dim: rgba(96, 200, 240, 0.14);
+
+  --text:          #dde1ee;
+  --text-secondary:#7e879f;
+  --text-muted:    #4e566e;
+
+  --radius:    8px;
+  --radius-lg: 14px;
+  --shadow:    0 1px 6px rgba(0, 0, 0, 0.5);
+  --shadow-md: 0 4px 24px rgba(0, 0, 0, 0.6);
+
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-size: 15px;
+  line-height: 1.6;
+  color: var(--text);
+  background: var(--bg);
+  -webkit-font-smoothing: antialiased;
+}
+
+body { min-height: 100vh; background: var(--bg); }
+a { color: var(--primary); text-decoration: none; }
+img { max-width: 100%; }
+input, select, textarea, button { font: inherit; }
+
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: var(--bg); }
+::-webkit-scrollbar-thumb { background: var(--border-bright); border-radius: 4px; }
