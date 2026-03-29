@@ -1,4 +1,4 @@
-import { createClient } from '@libsql/client';
+import { createClient } from '@libsql/client/web';
 import { fileURLToPath } from 'url';
 import path from 'path';
 
