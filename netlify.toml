@@ -3,11 +3,11 @@
   command = "npm run build"
   publish = "client/dist"
 
-# Proxy all /api/* requests to the Render backend.
+# Proxy all /api/* requests to the Railway backend.
 # Replace the URL below with your actual Render service URL after deploying.
 [[redirects]]
   from   = "/api/*"
-  to     = "https://YOUR-RENDER-SERVICE.onrender.com/api/:splat"
+  to     = "https://YOUR-RAILWAY-SERVICE.up.railway.app/api/:splat"
   status = 200
   force  = true
 
