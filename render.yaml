@@ -1,0 +1,24 @@
+services:
+  - type: web
+    name: migraine-calendar-server
+    runtime: node
+    rootDir: server
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: JWT_SECRET
+        generateValue: true        # Render auto-generates a secure random value
+      - key: APP_USERNAME
+        sync: false                # You set this manually in the Render dashboard
+      - key: APP_PASSWORD
+        sync: false                # You set this manually in the Render dashboard
+      - key: DATA_DIR
+        value: /data               # Points to the persistent disk below
+      - key: CLIENT_ORIGIN
+        sync: false                # Fill in after Netlify deploy: https://your-app.netlify.app
+    disk:
+      name: migraine-data
+      mountPath: /data
+      sizeGB: 1

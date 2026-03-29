@@ -17,7 +17,11 @@ dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors());
+// Allow requests from the Netlify frontend (set CLIENT_ORIGIN in production env vars)
+const allowedOrigins = process.env.CLIENT_ORIGIN
+  ? [process.env.CLIENT_ORIGIN]
+  : true; // allow all in dev
+app.use(cors({ origin: allowedOrigins, credentials: true }));
 app.use(express.json());
 
 initDB();
