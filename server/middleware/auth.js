@@ -1,5 +1,12 @@
 import jwt from 'jsonwebtoken';
 
+export function requireAdmin(req, res, next) {
+  if (req.user?.role === 'guest') {
+    return res.status(403).json({ error: 'Guests cannot modify data' });
+  }
+  next();
+}
+
 export function authenticateToken(req, res, next) {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];

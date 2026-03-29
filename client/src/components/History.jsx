@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 import { api } from '../api';
 
 export default function History() {
@@ -9,6 +10,8 @@ export default function History() {
   const [tab, setTab] = useState('headaches');
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const isGuest = user?.role === 'guest';
 
   useEffect(() => {
     Promise.all([api.getHeadaches(), api.getPreventive(), api.getPeriods()])
@@ -64,7 +67,8 @@ export default function History() {
             <div
               key={entry.id}
               className="history-card"
-              onClick={() => navigate(`/record/${entry.id}`)}
+              onClick={() => !isGuest && navigate(`/record/${entry.id}`)}
+              style={isGuest ? { cursor: 'default' } : {}}
             >
               <div className="history-card-header">
                 <span className="history-date">
@@ -76,11 +80,11 @@ export default function History() {
                   <span className={`intensity-badge intensity-${entry.intensity <= 3 ? 'low' : entry.intensity <= 6 ? 'medium' : 'high'}`}>
                     {entry.intensity}/10
                   </span>
-                  <button
+                  {!isGuest && <button
                     className="btn-delete"
                     onClick={(e) => handleDelete('headache', entry.id, e)}
                     title="Delete entry"
-                  >✕</button>
+                  >✕</button>}
                 </div>
               </div>
               <div className="history-card-body">
@@ -115,7 +119,8 @@ export default function History() {
             <div
               key={entry.id}
               className="history-card preventive-history"
-              onClick={() => navigate(`/preventive/${entry.id}`)}
+              onClick={() => !isGuest && navigate(`/preventive/${entry.id}`)}
+              style={isGuest ? { cursor: 'default' } : {}}
             >
               <div className="history-card-header">
                 <span className="history-date">
@@ -125,11 +130,11 @@ export default function History() {
                 </span>
                 <div className="history-card-actions">
                   <span className="tag">{entry.medication_type}</span>
-                  <button
+                  {!isGuest && <button
                     className="btn-delete"
                     onClick={(e) => handleDelete('preventive', entry.id, e)}
                     title="Delete entry"
-                  >✕</button>
+                  >✕</button>}
                 </div>
               </div>
               <div className="history-card-body">
@@ -149,7 +154,8 @@ export default function History() {
             <div
               key={entry.id}
               className="history-card period-history"
-              onClick={() => navigate(`/period/${entry.id}`)}
+              onClick={() => !isGuest && navigate(`/period/${entry.id}`)}
+              style={isGuest ? { cursor: 'default' } : {}}
             >
               <div className="history-card-header">
                 <span className="history-date">
@@ -159,11 +165,11 @@ export default function History() {
                 </span>
                 <div className="history-card-actions">
                   <span className="tag">{entry.period_length} days</span>
-                  <button
+                  {!isGuest && <button
                     className="btn-delete"
                     onClick={(e) => handleDelete('period', entry.id, e)}
                     title="Delete entry"
-                  >✕</button>
+                  >✕</button>}
                 </div>
               </div>
               <div className="history-card-body">

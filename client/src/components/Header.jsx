@@ -5,6 +5,7 @@ import { api } from '../api';
 
 export default function Header() {
   const { user, logout } = useAuth();
+  const isGuest = user?.role === 'guest';
   const navigate = useNavigate();
   const [weatherStatus, setWeatherStatus] = useState(null); // null | 'loading' | 'done'
 
@@ -39,15 +40,15 @@ export default function Header() {
           <Link to="/" className="nav-link">Dashboard</Link>
           {user && (
             <>
-              <Link to="/record" className="nav-link">🤯</Link>
-              <Link to="/preventive" className="nav-link">💊</Link>
-              <Link to="/period" className="nav-link">🩸</Link>
+              {!isGuest && <Link to="/record" className="nav-link">🤯</Link>}
+              {!isGuest && <Link to="/preventive" className="nav-link">💊</Link>}
+              {!isGuest && <Link to="/period" className="nav-link">🩸</Link>}
               <Link to="/history" className="nav-link">📝</Link>
             </>
           )}
         </nav>
         <div className="auth-section">
-          {user && (
+          {user && !isGuest && (
             <button
               onClick={handleFetchWeather}
               className="btn-weather-fetch"
@@ -58,7 +59,10 @@ export default function Header() {
             </button>
           )}
           {user ? (
-            <button onClick={handleLogout} className="btn btn-outline btn-sm">Logout</button>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              {isGuest && <span className="badge-guest">Guest</span>}
+              <button onClick={handleLogout} className="btn btn-outline btn-sm">Logout</button>
+            </div>
           ) : (
             <Link to="/login" className="btn btn-primary btn-sm">Login</Link>
           )}

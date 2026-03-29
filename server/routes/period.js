@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import db from '../db.js';
-import { authenticateToken } from '../middleware/auth.js';
+import { authenticateToken, requireAdmin } from '../middleware/auth.js';
 import { fetchRangeAroundDate } from '../utils/weather.js';
 
 const router = Router();
@@ -36,7 +36,7 @@ router.get('/:id', async (req, res) => {
   res.json({ ...entry, ...computeCycle(entry) });
 });
 
-router.post('/', authenticateToken, async (req, res) => {
+router.post('/', authenticateToken, requireAdmin, async (req, res) => {
   const { start_date, cycle_length, period_length, notes } = req.body;
   if (!start_date) return res.status(400).json({ error: 'start_date required' });
 
@@ -71,7 +71,7 @@ router.post('/', authenticateToken, async (req, res) => {
   res.status(201).json({ ...entry, ...computeCycle(entry) });
 });
 
-router.put('/:id', authenticateToken, async (req, res) => {
+router.put('/:id', authenticateToken, requireAdmin, async (req, res) => {
   const existing = (await db.execute({ sql: 'SELECT * FROM period_entries WHERE id = ?', args: [req.params.id] })).rows[0];
   if (!existing) return res.status(404).json({ error: 'Not found' });
 
@@ -85,7 +85,7 @@ router.put('/:id', authenticateToken, async (req, res) => {
   res.json({ ...updated, ...computeCycle(updated) });
 });
 
-router.delete('/:id', authenticateToken, async (req, res) => {
+router.delete('/:id', authenticateToken, requireAdmin, async (req, res) => {
   const existing = (await db.execute({ sql: 'SELECT * FROM period_entries WHERE id = ?', args: [req.params.id] })).rows[0];
   if (!existing) return res.status(404).json({ error: 'Not found' });
   await db.execute({ sql: 'DELETE FROM period_entries WHERE id = ?', args: [req.params.id] });

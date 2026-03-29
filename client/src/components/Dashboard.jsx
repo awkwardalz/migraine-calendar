@@ -21,6 +21,7 @@ export default function Dashboard() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
+  const isGuest = user?.role === 'guest';
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -162,7 +163,7 @@ export default function Dashboard() {
             <div className="day-detail">
               <div className="day-detail-header">
                 <h3>{new Date(selectedDate + 'T00:00:00').toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</h3>
-                {user && (
+                {user && !isGuest && (
                   <div className="day-detail-actions">
                     <button className="btn btn-outline btn-sm" onClick={() => navigate(`/record?date=${selectedDate}`)}>
                       🤯 Headache
@@ -229,7 +230,7 @@ export default function Dashboard() {
                       )}
                       {entry.notes && <p><strong>Notes:</strong> {entry.notes}</p>}
                     </div>
-                    {user && (
+                    {user && !isGuest && (
                       <button className="btn btn-outline btn-sm" onClick={() => navigate(`/record/${entry.id}`)}>
                         Edit
                       </button>
@@ -251,7 +252,7 @@ export default function Dashboard() {
                       </div>
                       {entry.dosage && <p>Dosage: {entry.dosage}</p>}
                       {entry.notes && <p>Notes: {entry.notes}</p>}
-                      {user && (
+                      {user && !isGuest && (
                         <button className="btn btn-outline btn-sm" onClick={() => navigate(`/preventive/${entry.id}`)}>
                           Edit
                         </button>

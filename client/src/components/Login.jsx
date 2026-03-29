@@ -29,6 +29,19 @@ export default function Login() {
     }
   };
 
+  const handleGuestLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await login('guest', 'guest');
+      navigate('/');
+    } catch {
+      setError('Guest login unavailable');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="login-container">
       <div className="login-card">
@@ -63,6 +76,10 @@ export default function Login() {
             {loading ? 'Signing in...' : 'Sign In'}
           </button>
         </form>
+        <div className="login-divider">or</div>
+        <button className="btn btn-outline btn-full" onClick={handleGuestLogin} disabled={loading}>
+          Continue as Guest (view only)
+        </button>
       </div>
     </div>
   );

@@ -19,12 +19,20 @@ router.post('/login', (req, res) => {
     return res.status(400).json({ error: 'Username and password are required' });
   }
 
-  const validUser = safeCompare(username, process.env.APP_USERNAME);
-  const validPass = safeCompare(password, process.env.APP_PASSWORD);
+  const guestUser = process.env.GUEST_USERNAME || 'guest';
+  const guestPass = process.env.GUEST_PASSWORD || 'guest';
 
-  if (validUser && validPass) {
-    const token = jwt.sign({ username }, process.env.JWT_SECRET, { expiresIn: '7d' });
-    return res.json({ token, username });
+  const validAdmin  = safeCompare(username, process.env.APP_USERNAME) && safeCompare(password, process.env.APP_PASSWORD);
+  const validGuest  = safeCompare(username, guestUser) && safeCompare(password, guestPass);
+
+  if (validAdmin) {
+    const token = jwt.sign({ username, role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    return res.json({ token, username, role: 'admin' });
+  }
+
+  if (validGuest) {
+    const token = jwt.sign({ username, role: 'guest' }, process.env.JWT_SECRET, { expiresIn: '7d' });
+    return res.json({ token, username, role: 'guest' });
   }
 
   return res.status(401).json({ error: 'Invalid credentials' });
@@ -38,7 +46,7 @@ router.get('/verify', (req, res) => {
 
   try {
     const user = jwt.verify(token, process.env.JWT_SECRET);
-    res.json({ valid: true, username: user.username });
+    res.json({ valid: true, username: user.username, role: user.role || 'admin' });
   } catch {
     res.status(401).json({ error: 'Invalid token' });
   }
