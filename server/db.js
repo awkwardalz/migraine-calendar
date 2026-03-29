@@ -1,12 +1,11 @@
-import { createClient } from '@libsql/client/web';
-import { fileURLToPath } from 'url';
-import path from 'path';
+import { createClient } from '@libsql/client/http';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const localDbPath = path.join(__dirname, '..', 'data', 'migraine.db');
+if (!process.env.TURSO_DATABASE_URL) {
+  throw new Error('TURSO_DATABASE_URL env var is required. Set it in .env (local) or Netlify env vars (production).');
+}
 
 const db = createClient({
-  url: process.env.TURSO_DATABASE_URL || `file:${localDbPath}`,
+  url: process.env.TURSO_DATABASE_URL,
   authToken: process.env.TURSO_AUTH_TOKEN || undefined,
 });
 
