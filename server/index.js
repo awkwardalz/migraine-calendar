@@ -1,11 +1,13 @@
 import path from 'path';
 import { fileURLToPath } from 'url';
 import dotenv from 'dotenv';
-import { initDB } from './db.js';
-import app from './app.js';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 dotenv.config({ path: path.resolve(__dirname, '..', '.env') });
+
+// Dynamic imports run after dotenv has loaded env vars
+const { initDB } = await import('./db.js');
+const { default: app } = await import('./app.js');
 
 const PORT = process.env.PORT || 3001;
 

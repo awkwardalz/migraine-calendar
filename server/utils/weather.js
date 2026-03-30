@@ -74,6 +74,142 @@ export async function fetchAndCacheWeather(dateStr, force = false) {
   }
 }
 
+// Fetch a contiguous date range from Open-Meteo in one API call.
+// Returns array of raw day objects (no pressure_delta yet).
+async function fetchOpenMeteoRange(startDate, endDate) {
+  const url = new URL('https://api.open-meteo.com/v1/forecast');
+  url.searchParams.set('latitude', HK_LAT);
+  url.searchParams.set('longitude', HK_LON);
+  url.searchParams.set('daily', ['temperature_2m_max','temperature_2m_min','precipitation_sum','weathercode'].join(','));
+  url.searchParams.set('hourly', 'surface_pressure');
+  url.searchParams.set('timezone', 'Asia/Hong_Kong');
+  url.searchParams.set('start_date', startDate);
+  url.searchParams.set('end_date', endDate);
+
+  console.log(`[weather] fetchOpenMeteoRange: ${startDate} → ${endDate}`);
+  console.log(`[weather] URL: ${url.toString()}`);
+
+  try {
+    const res = await fetch(url.toString());
+    console.log(`[weather] Open-Meteo response status: ${res.status}`);
+    if (!res.ok) {
+      const body = await res.text();
+      console.error(`[weather] Open-Meteo error body: ${body}`);
+      return [];
+    }
+    const json = await res.json();
+    console.log(`[weather] Open-Meteo daily.time:`, json.daily?.time);
+    console.log(`[weather] Open-Meteo hourly.surface_pressure length:`, json.hourly?.surface_pressure?.length);
+
+    const daily = json.daily;
+    if (!daily?.time?.length) return [];
+
+    // hourly surface_pressure: 24 values per day, in day order
+    const hourly = json.hourly?.surface_pressure ?? [];
+    const nDays = daily.time.length;
+    const results = [];
+    for (let i = 0; i < nDays; i++) {
+      const dayHours = hourly.slice(i * 24, (i + 1) * 24).filter(v => v != null);
+      results.push({
+        date: daily.time[i],
+        temp_max: daily.temperature_2m_max?.[i] ?? null,
+        temp_min: daily.temperature_2m_min?.[i] ?? null,
+        precipitation: daily.precipitation_sum?.[i] ?? null,
+        pressure_max: dayHours.length ? Math.max(...dayHours) : null,
+        pressure_min: dayHours.length ? Math.min(...dayHours) : null,
+        weathercode: daily.weathercode?.[i] ?? null,
+      });
+    }
+    console.log(`[weather] fetchOpenMeteoRange parsed ${results.length} days`);
+    return results;
+  } catch (err) {
+    console.error(`[weather] fetchOpenMeteoRange exception:`, err);
+    return [];
+  }
+}
+
+// Batch-fetch a date range using at most two API calls:
+//   1. One call for historical dates not yet in cache
+//   2. One call for today + future forecast (always refreshed)
+// Existing cached historical rows are preserved as-is.
+export async function batchFetchAndCache(startDate, endDate) {
+  const today = new Date().toISOString().slice(0, 10);
+  console.log(`[weather] batchFetchAndCache called: ${startDate} → ${endDate}, today=${today}`);
+
+  // Determine which past dates (before today) are missing from cache
+  let uncachedHistorical = [];
+  const yesterday = getPrevDay(today);
+  if (startDate <= yesterday) {
+    const histEnd = endDate < today ? endDate : yesterday;
+    const rs = await db.execute({
+      sql: 'SELECT date FROM weather_cache WHERE date >= ? AND date <= ?',
+      args: [startDate, histEnd],
+    });
+    const cached = new Set(rs.rows.map(r => String(r.date)));
+    console.log(`[weather] Already cached historical dates (${cached.size}):`, [...cached].slice(0, 5), '...');
+    const cur = new Date(startDate + 'T00:00:00Z');
+    const last = new Date(histEnd + 'T00:00:00Z');
+    while (cur <= last) {
+      const d = cur.toISOString().slice(0, 10);
+      if (!cached.has(d)) uncachedHistorical.push(d);
+      cur.setUTCDate(cur.getUTCDate() + 1);
+    }
+  }
+  console.log(`[weather] Uncached historical dates: ${uncachedHistorical.length}`, uncachedHistorical.slice(0, 5));
+
+  const allRows = [];
+
+  // One batch call for all missing historical dates
+  if (uncachedHistorical.length > 0) {
+    console.log(`[weather] Fetching historical batch: ${uncachedHistorical[0]} → ${uncachedHistorical[uncachedHistorical.length - 1]}`);
+    const rows = await fetchOpenMeteoRange(
+      uncachedHistorical[0],
+      uncachedHistorical[uncachedHistorical.length - 1],
+    );
+    const needed = new Set(uncachedHistorical);
+    const filtered = rows.filter(r => needed.has(r.date));
+    console.log(`[weather] Historical rows returned: ${rows.length}, after filter: ${filtered.length}`);
+    allRows.push(...filtered);
+  }
+
+  // One batch call for today through end (always refresh forecast)
+  if (endDate >= today) {
+    const foreStart = startDate > today ? startDate : today;
+    console.log(`[weather] Fetching forecast batch: ${foreStart} → ${endDate}`);
+    const rows = await fetchOpenMeteoRange(foreStart, endDate);
+    console.log(`[weather] Forecast rows returned: ${rows.length}`);
+    allRows.push(...rows);
+  }
+
+  console.log(`[weather] Total rows to insert: ${allRows.length}`);
+
+  if (allRows.length === 0) return 0;
+
+  // Build a quick lookup from this batch for pressure_delta calculation
+  const batchMap = Object.fromEntries(allRows.map(r => [r.date, r]));
+
+  for (const row of allRows) {
+    const prevDay = getPrevDay(row.date);
+    let prevPressureMin = batchMap[prevDay]?.pressure_min ?? null;
+    if (prevPressureMin == null && prevDay) {
+      const rs = await db.execute({ sql: 'SELECT pressure_min FROM weather_cache WHERE date = ?', args: [prevDay] });
+      prevPressureMin = rs.rows[0]?.pressure_min ?? null;
+    }
+    let pressureDelta = null;
+    if (row.pressure_max != null && prevPressureMin != null) {
+      pressureDelta = parseFloat((row.pressure_max - Number(prevPressureMin)).toFixed(2));
+    }
+    await db.execute({
+      sql: `INSERT OR REPLACE INTO weather_cache
+              (date, temp_max, temp_min, precipitation, pressure_max, pressure_min, pressure_delta, weathercode, fetched_at)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, datetime('now'))`,
+      args: [row.date, row.temp_max, row.temp_min, row.precipitation, row.pressure_max, row.pressure_min, pressureDelta, row.weathercode],
+    });
+  }
+
+  return allRows.length;
+}
+
 export async function fetchRangeAroundDate(anchorDate, daysBefore = 7) {
   const today = new Date().toISOString().slice(0, 10);
   const anchor = new Date(anchorDate + 'T00:00:00Z');

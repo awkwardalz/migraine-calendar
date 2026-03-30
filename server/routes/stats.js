@@ -1,8 +1,15 @@
 import { Router } from 'express';
 import db from '../db.js';
 import { authenticateToken } from '../middleware/auth.js';
+import { weatherLabel } from '../utils/weather.js';
 
 const router = Router();
+
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
 
 router.get('/', async (req, res) => {
   try {
@@ -109,11 +116,27 @@ router.get('/report', authenticateToken, async (req, res) => {
       e.medications.forEach(m => { medCounts[m.name] = (medCounts[m.name] || 0) + (m.quantity || 1); });
     });
 
+    // Fetch weather context: ±3 days around each headache date
+    let weatherByDate = {};
+    if (headaches.length > 0) {
+      const sortedDates = headaches.map(h => h.date).sort();
+      const weatherStart = addDays(sortedDates[0], -3);
+      const weatherEnd = addDays(sortedDates[sortedDates.length - 1], 3);
+      const weatherRows = (await db.execute({
+        sql: 'SELECT * FROM weather_cache WHERE date BETWEEN ? AND ? ORDER BY date',
+        args: [weatherStart, weatherEnd],
+      })).rows;
+      weatherRows.forEach(row => {
+        weatherByDate[row.date] = { ...row, ...weatherLabel(row.weathercode) };
+      });
+    }
+
     res.json({
       from, to, totalDays,
       headaches,
       preventive,
       periods,
+      weatherByDate,
       summary: {
         migraineDays: headaches.length,
         migraineFreeDays: totalDays - headaches.length,

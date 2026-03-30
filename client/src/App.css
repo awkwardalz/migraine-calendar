@@ -1321,6 +1321,71 @@
   font-size: 0.78rem;
 }
 
+.report-subtitle-small {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-bottom: 16px;
+}
+
+.weather-cluster {
+  margin-bottom: 24px;
+}
+
+.weather-cluster-title {
+  font-size: 0.92rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text-secondary);
+}
+
+.weather-context-table td,
+.weather-context-table th {
+  font-size: 0.8rem;
+}
+
+.weather-row-headache {
+  background: rgba(240, 96, 96, 0.1);
+  font-weight: 500;
+}
+
+.weather-row-period {
+  background: rgba(220, 100, 140, 0.07);
+}
+
+.period-day-badge {
+  font-size: 0.78rem;
+  color: #c0608a;
+  white-space: nowrap;
+}
+
+@media print {
+  .weather-row-period {
+    background: #fdf0f5 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .period-day-badge {
+    color: #a0406a !important;
+  }
+}
+
+.pressure-drop-cell {
+  color: #e05050;
+  font-weight: 600;
+}
+
+@media print {
+  .weather-row-headache {
+    background: #fde8e8 !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  .pressure-drop-cell {
+    color: #c00 !important;
+    font-weight: bold;
+  }
+}
+
 .report-footer {
   margin-top: 32px;
   padding-top: 12px;

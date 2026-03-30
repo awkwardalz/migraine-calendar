@@ -42,14 +42,22 @@ Charts and breakdowns powered by Chart.js:
 - **Period / cycle** summary (average cycle length, total periods logged)
 
 ### 🌤️ Weather Overlay
-- Fetches historical weather for Hong Kong automatically via [Open-Meteo](https://open-meteo.com)
+- Fetches weather data for Hong Kong via [Open-Meteo](https://open-meteo.com) — up to 90 days back and 14 days ahead in a single button press
 - Logs hourly surface pressure, daily temperature, and precipitation
-- Weather data is shown on calendar tiles (admin only)
+- Weather icons shown on calendar tiles; full details (condition, temp, pressure, pressure delta, rain) visible when clicking a day
+- Already-cached historical data is preserved on re-fetch; only uncached past dates and the latest forecast are updated
 
 ### 📄 Doctor's Report
 - Select a custom date range and generate a printable summary
-- Includes: migraine days count, average intensity, top triggers, top symptoms, acute/preventive medication usage, full headache entry table, and period records
-- "Print / Save as PDF" button — prints cleanly without UI chrome (controls are hidden via print CSS)
+- **Summary**: migraine days, frequency %, average intensity, preventive doses, period records
+- **Top triggers, symptoms, and acute medications** — ranked by occurrence
+- **Preventive medication log** and **full headache entry table**
+- **Weather Context section** — for each headache incident, shows a ±3 day weather table:
+  - Consecutive incidents whose windows overlap are merged into one table (no redundant rows)
+  - Headache days are highlighted in red with intensity badge
+  - Period days are marked with 🩸 day number if a period was active
+  - Large pressure drops (Δ < −8 hPa) are flagged in red
+- "Print / Save as PDF" button — prints cleanly without UI chrome
 - Available to both admin and guest users
 
 ### 📝 Entry History

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import db from '../db.js';
-import { weatherLabel, fetchAndCacheWeather } from '../utils/weather.js';
+import { weatherLabel, fetchAndCacheWeather, batchFetchAndCache } from '../utils/weather.js';
 
 const router = Router();
 
@@ -21,20 +21,17 @@ router.get('/', async (req, res) => {
 });
 
 router.post('/fetch', async (req, res) => {
-  const today = new Date().toISOString().slice(0, 10);
+  const defaultStart = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
   const defaultEnd = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
-  const start = req.body?.start || today;
+  const start = req.body?.start || defaultStart;
   const end   = req.body?.end   || defaultEnd;
+  console.log(`[weather route] POST /fetch body:`, req.body, `→ start=${start}, end=${end}`);
   if (!/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end))
     return res.status(400).json({ error: 'Invalid date format' });
 
-  const dates = [];
-  const cur = new Date(start + 'T00:00:00Z');
-  const last = new Date(end + 'T00:00:00Z');
-  while (cur <= last) { dates.push(cur.toISOString().slice(0, 10)); cur.setUTCDate(cur.getUTCDate() + 1); }
-
-  await Promise.all(dates.map(d => fetchAndCacheWeather(d, d > today).catch(() => null)));
-  res.json({ fetched: dates.length, start, end });
+  const fetched = await batchFetchAndCache(start, end);
+  console.log(`[weather route] POST /fetch done, fetched=${fetched}`);
+  res.json({ fetched, start, end });
 });
 
 export default router;

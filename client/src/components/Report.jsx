@@ -21,6 +21,77 @@ function topEntries(obj, n = 5) {
     .slice(0, n);
 }
 
+function addDays(dateStr, n) {
+  const d = new Date(dateStr + 'T12:00:00');
+  d.setDate(d.getDate() + n);
+  return d.toISOString().slice(0, 10);
+}
+
+function dateRange(start, end) {
+  const dates = [];
+  let d = start;
+  while (d <= end) { dates.push(d); d = addDays(d, 1); }
+  return dates;
+}
+
+// Returns period info for a date: { day: N, isStart: bool, period } or null.
+function getPeriodInfo(date, periods) {
+  for (const p of periods) {
+    const start = p.start_date;
+    const periodLen = p.period_length || 5;
+    const end = addDays(start, periodLen - 1);
+    if (date >= start && date <= end) {
+      const day = Math.round((new Date(date + 'T12:00:00') - new Date(start + 'T12:00:00')) / 86400000) + 1;
+      return { day, isStart: date === start, period: p };
+    }
+  }
+  return null;
+}
+
+// Groups headache dates into clusters where ±3 day windows overlap (dates ≤6 days apart).
+// Returns array of { start, end, headacheDates, rows[] }.
+function buildWeatherClusters(headaches, weatherByDate, periods = []) {
+  if (!headaches.length) return [];
+
+  const uniqueDates = [...new Set(headaches.map(h => h.date))].sort();
+  const headachesByDate = {};
+  headaches.forEach(h => {
+    if (!headachesByDate[h.date]) headachesByDate[h.date] = [];
+    headachesByDate[h.date].push(h);
+  });
+
+  const clusters = [];
+  let wStart = addDays(uniqueDates[0], -3);
+  let wEnd = addDays(uniqueDates[0], 3);
+  let clusterDates = [uniqueDates[0]];
+
+  for (let i = 1; i < uniqueDates.length; i++) {
+    const nextWindowStart = addDays(uniqueDates[i], -3);
+    if (nextWindowStart <= wEnd) {
+      const nextWindowEnd = addDays(uniqueDates[i], 3);
+      if (nextWindowEnd > wEnd) wEnd = nextWindowEnd;
+      clusterDates.push(uniqueDates[i]);
+    } else {
+      clusters.push({ start: wStart, end: wEnd, headacheDates: clusterDates });
+      wStart = nextWindowStart;
+      wEnd = addDays(uniqueDates[i], 3);
+      clusterDates = [uniqueDates[i]];
+    }
+  }
+  clusters.push({ start: wStart, end: wEnd, headacheDates: clusterDates });
+
+  return clusters.map(cluster => ({
+    ...cluster,
+    rows: dateRange(cluster.start, cluster.end).map(date => ({
+      date,
+      weather: weatherByDate[date] || null,
+      isHeadacheDay: !!headachesByDate[date],
+      headacheEntries: headachesByDate[date] || [],
+      periodInfo: getPeriodInfo(date, periods),
+    })),
+  }));
+}
+
 function defaultFrom() {
   const d = new Date();
   d.setMonth(d.getMonth() - 3);
@@ -255,6 +326,70 @@ export default function Report() {
               </table>
             </section>
           )}
+
+          {/* Weather context per headache cluster */}
+          {report.headaches.length > 0 && Object.keys(report.weatherByDate || {}).length > 0 && (() => {
+            const clusters = buildWeatherClusters(report.headaches, report.weatherByDate || {}, report.periods || []);
+            return (
+              <section className="report-section">
+                <h2>Weather Context</h2>
+                <p className="report-subtitle-small">Weather ±3 days around each headache incident. Headache days are highlighted.</p>
+                {clusters.map((cluster, ci) => (
+                  <div key={ci} className="weather-cluster">
+                    <h3 className="weather-cluster-title">
+                      Incident {ci + 1}: {cluster.headacheDates.map(d => formatDate(d)).join(', ')}
+                    </h3>
+                    <table className="report-table weather-context-table">
+                      <thead>
+                        <tr>
+                          <th>Date</th>
+                          <th>Condition</th>
+                          <th>Temp (°C)</th>
+                          <th>Pressure (hPa)</th>
+                          <th>Δ Pressure</th>
+                          <th>Rain (mm)</th>
+                          <th>Period</th>
+                          <th>Headache</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {cluster.rows.map(row => (
+                          <tr key={row.date} className={row.isHeadacheDay ? 'weather-row-headache' : row.periodInfo ? 'weather-row-period' : ''}>
+                            <td style={{ whiteSpace: 'nowrap' }}>
+                              {row.isHeadacheDay ? <strong>{formatDate(row.date)}</strong> : formatDate(row.date)}
+                            </td>
+                            <td>{row.weather ? `${row.weather.icon} ${row.weather.label}` : '—'}</td>
+                            <td>{row.weather ? `${row.weather.temp_min?.toFixed(0)}–${row.weather.temp_max?.toFixed(0)}` : '—'}</td>
+                            <td>{row.weather?.pressure_max != null ? row.weather.pressure_max.toFixed(0) : '—'}</td>
+                            <td className={row.weather?.pressure_delta < -8 ? 'pressure-drop-cell' : ''}>
+                              {row.weather?.pressure_delta != null
+                                ? `${row.weather.pressure_delta > 0 ? '+' : ''}${row.weather.pressure_delta.toFixed(1)}`
+                                : '—'}
+                            </td>
+                            <td>{row.weather?.precipitation > 0 ? row.weather.precipitation.toFixed(1) : '—'}</td>
+                            <td>
+                              {row.periodInfo
+                                ? <span className="period-day-badge">{row.periodInfo.isStart ? '🩸 Day 1' : `🩸 Day ${row.periodInfo.day}`}</span>
+                                : ''}
+                            </td>
+                            <td>
+                              {row.isHeadacheDay
+                                ? row.headacheEntries.map(h => (
+                                  <span key={h.id} className={`intensity-badge intensity-${h.intensity <= 3 ? 'low' : h.intensity <= 6 ? 'medium' : 'high'}`}>
+                                    {h.intensity}/10
+                                  </span>
+                                ))
+                                : ''}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                ))}
+              </section>
+            );
+          })()}
 
           <div className="report-footer">
             <p>This report was generated from Migraine Diary. All data entered by patient.</p>

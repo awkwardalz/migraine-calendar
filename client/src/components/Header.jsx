@@ -7,21 +7,24 @@ export default function Header() {
   const { user, logout } = useAuth();
   const isGuest = user?.role === 'guest';
   const navigate = useNavigate();
-  const [weatherStatus, setWeatherStatus] = useState(null); // null | 'loading' | 'done'
+  const [weatherStatus, setWeatherStatus] = useState(null); // null | 'loading' | 'done' | 'error'
 
   const handleFetchWeather = async () => {
     if (weatherStatus === 'loading') return;
     setWeatherStatus('loading');
     try {
-      const today = new Date().toISOString().slice(0, 10);
       const start = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
       const end = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
-      await api.triggerWeatherFetch(start, end);
+      console.log('[weather] triggering fetch', start, '→', end);
+      const result = await api.triggerWeatherFetch(start, end);
+      console.log('[weather] fetch result:', result);
       setWeatherStatus('done');
       window.dispatchEvent(new CustomEvent('weather-fetched'));
       setTimeout(() => setWeatherStatus(null), 2500);
-    } catch {
-      setWeatherStatus(null);
+    } catch (err) {
+      console.error('[weather] fetch failed:', err);
+      setWeatherStatus('error');
+      setTimeout(() => setWeatherStatus(null), 4000);
     }
   };
 
@@ -57,7 +60,7 @@ export default function Header() {
               title="Fetch weather data"
               disabled={weatherStatus === 'loading'}
             >
-              {weatherStatus === 'loading' ? '⏳' : weatherStatus === 'done' ? '✅' : '🌤️'}
+              {weatherStatus === 'loading' ? '⏳' : weatherStatus === 'done' ? '✅' : weatherStatus === 'error' ? '❌' : '🌤️'}
             </button>
           )}
           {user ? (

@@ -20,6 +20,7 @@ export default function Dashboard() {
   const [weather, setWeather] = useState({});
   const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [activeMonth, setActiveMonth] = useState(new Date());
   const { user } = useAuth();
   const isGuest = user?.role === 'guest';
   const navigate = useNavigate();
@@ -34,24 +35,30 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
-  // Load weather for current + next 14 days
-  const loadWeather = () => {
-    const today = formatDate(new Date());
-    const end = formatDate(new Date(Date.now() + 14 * 86400000));
-    api.getWeather(today, end)
+  // Load weather for the visible month (prev month start → next month end to cover navigation overlap)
+  const loadWeather = (anchor = activeMonth) => {
+    const y = anchor.getFullYear();
+    const m = anchor.getMonth();
+    const start = formatDate(new Date(y, m - 1, 1));
+    const end = formatDate(new Date(y, m + 2, 0)); // last day of next month
+    api.getWeather(start, end)
       .then(rows => {
         const map = {};
         rows.forEach(r => { map[r.date] = r; });
-        setWeather(map);
+        setWeather(prev => ({ ...prev, ...map }));
       })
       .catch(() => {});
   };
 
   useEffect(() => {
-    loadWeather();
-    window.addEventListener('weather-fetched', loadWeather);
-    return () => window.removeEventListener('weather-fetched', loadWeather);
-  }, []);
+    loadWeather(activeMonth);
+  }, [activeMonth]);
+
+  useEffect(() => {
+    const handler = () => loadWeather(activeMonth);
+    window.addEventListener('weather-fetched', handler);
+    return () => window.removeEventListener('weather-fetched', handler);
+  }, [activeMonth]);
 
   // Build lookup maps
   const headacheMap = {};
@@ -152,6 +159,9 @@ export default function Dashboard() {
           <div className="calendar-wrapper">
             <Calendar
               onClickDay={handleDateClick}
+              onActiveStartDateChange={({ activeStartDate }) => {
+                if (activeStartDate) setActiveMonth(activeStartDate);
+              }}
               tileClassName={tileClassName}
               tileContent={tileContent}
               value={selectedDate ? new Date(selectedDate + 'T00:00:00') : new Date()}
