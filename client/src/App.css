@@ -263,9 +263,10 @@
 .form-group input[type="password"],
 .form-group input[type="date"],
 .form-group input[type="number"],
+.report-date-row input[type="date"],
 .form-group select,
 .form-group textarea {
-    color: white;
+  color: var(--text-primary);
   width: 100%;
   padding: 10px 14px;
   border: 2px solid var(--border);
@@ -273,6 +274,7 @@
   font-size: 0.95rem;
   transition: border-color 0.15s;
   background: var(--card);
+  color-scheme: dark;
 }
 
 .form-group input:focus,
