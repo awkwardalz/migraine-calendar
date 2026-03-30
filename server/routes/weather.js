@@ -33,7 +33,7 @@ router.post('/fetch', async (req, res) => {
   const last = new Date(end + 'T00:00:00Z');
   while (cur <= last) { dates.push(cur.toISOString().slice(0, 10)); cur.setUTCDate(cur.getUTCDate() + 1); }
 
-  await Promise.all(dates.map(d => fetchAndCacheWeather(d, d <= today).catch(() => null)));
+  await Promise.all(dates.map(d => fetchAndCacheWeather(d, d > today).catch(() => null)));
   res.json({ fetched: dates.length, start, end });
 });
 

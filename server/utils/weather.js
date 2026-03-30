@@ -2,7 +2,6 @@ import db from '../db.js';
 
 const HK_LAT = 22.3193;
 const HK_LON = 114.1694;
-const CUTOFF = '2026-03-29';
 
 export function weatherLabel(code) {
   if (code === 0)  return { icon: '\u2600\ufe0f', label: 'Clear' };
@@ -19,8 +18,6 @@ export function weatherLabel(code) {
 }
 
 export async function fetchAndCacheWeather(dateStr, force = false) {
-  if (dateStr < CUTOFF) return;
-
   if (!force) {
     const rs = await db.execute({ sql: 'SELECT date FROM weather_cache WHERE date = ?', args: [dateStr] });
     if (rs.rows.length > 0) return;
@@ -85,7 +82,7 @@ export async function fetchRangeAroundDate(anchorDate, daysBefore = 7) {
     const d = new Date(anchor);
     d.setUTCDate(d.getUTCDate() - i);
     const dateStr = d.toISOString().slice(0, 10);
-    promises.push(fetchAndCacheWeather(dateStr, dateStr <= today).catch(() => null));
+    promises.push(fetchAndCacheWeather(dateStr, dateStr > today).catch(() => null));
   }
   await Promise.all(promises);
 }

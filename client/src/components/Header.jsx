@@ -14,8 +14,9 @@ export default function Header() {
     setWeatherStatus('loading');
     try {
       const today = new Date().toISOString().slice(0, 10);
+      const start = new Date(Date.now() - 90 * 86400000).toISOString().slice(0, 10);
       const end = new Date(Date.now() + 14 * 86400000).toISOString().slice(0, 10);
-      await api.triggerWeatherFetch(today, end);
+      await api.triggerWeatherFetch(start, end);
       setWeatherStatus('done');
       window.dispatchEvent(new CustomEvent('weather-fetched'));
       setTimeout(() => setWeatherStatus(null), 2500);

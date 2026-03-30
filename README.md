@@ -90,6 +90,7 @@ Firebase Realtime Database and Firestore are document/JSON stores with no native
 
 - Node.js 18+
 - A [Turso](https://turso.tech) account and database
+- A [Netlify](https://netlify.app) account
 
 ### 2. Create a Turso database
 
