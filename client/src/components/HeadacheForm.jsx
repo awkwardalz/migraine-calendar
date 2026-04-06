@@ -9,6 +9,7 @@ const TIME_OPTIONS = ['Early morning', 'Morning', 'Afternoon', 'Evening', 'Night
 const MEDICATIONS = [
   { name: 'Paracetamol 500mg', maxQty: 8 },
   { name: 'Panadol Extra', maxQty: 8 },
+  { name: 'Eve (Ibuprofen 200mg)', maxQty: 3 },
   { name: 'Relpax 20mg', maxQty: 2 },
   { name: 'Nurtec', maxQty: 2 },
 ];
