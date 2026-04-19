@@ -7,25 +7,25 @@ A personal migraine headache tracking web app with calendar visualization, stati
 ## Screenshots
 
 ### Login
-![Login page](https://github.com/user-attachments/assets/ea46963e-a16f-4055-b7fd-934a029d86df)
+![Login page showing username and password input fields with a Sign In button](https://github.com/user-attachments/assets/ea46963e-a16f-4055-b7fd-934a029d86df)
 
 ### Calendar Dashboard
-![Calendar dashboard with color-coded migraine days and weather overlay](https://github.com/user-attachments/assets/a98917c1-6b8d-4fcd-ae07-05dab195d926)
+![Calendar dashboard showing color-coded migraine days by intensity, preventive medication markers, weather icons on each tile, and a stats panel with charts on the right](https://github.com/user-attachments/assets/a98917c1-6b8d-4fcd-ae07-05dab195d926)
 
 ### Day Detail
-![Clicking a day reveals its headache entry, weather data, and quick-log buttons](https://github.com/user-attachments/assets/976b4d71-b905-4fe4-b1ce-c7d79b45d950)
+![Day detail panel showing a headache entry with intensity badge, location, symptoms and triggers, alongside the day's local weather data and quick-action buttons for logging new entries](https://github.com/user-attachments/assets/976b4d71-b905-4fe4-b1ce-c7d79b45d950)
 
 ### Headache Log Form
-![Headache logging form with location, intensity slider, symptoms, and triggers](https://github.com/user-attachments/assets/d23d0aa8-e6b3-45a2-b585-5ae7670af5db)
+![Headache logging form with date picker, pain location and area toggles, intensity slider from 1 to 10, time of day selector, medication quantity controls, multi-select symptoms, and multi-select triggers](https://github.com/user-attachments/assets/d23d0aa8-e6b3-45a2-b585-5ae7670af5db)
 
 ### Preventive Medication Form
-![Preventive medication form with injectable and oral options](https://github.com/user-attachments/assets/972d3995-0444-4c72-a65f-ce58d8797792)
+![Preventive medication form showing a grid of injectable and oral medication options, with Ajovy selected, and Type and Dosage fields pre-filled](https://github.com/user-attachments/assets/972d3995-0444-4c72-a65f-ce58d8797792)
 
 ### Entry History
-![Chronological history of all headache entries with inline tags](https://github.com/user-attachments/assets/385f574e-568d-4993-b504-7940dc63cd85)
+![Chronological history list of headache entries showing date, intensity badge, location, duration, medications taken, and symptom tags for each entry](https://github.com/user-attachments/assets/385f574e-568d-4993-b504-7940dc63cd85)
 
 ### Doctor's Report
-![Printable doctor's report with summary stats, top triggers, and weather context](https://github.com/user-attachments/assets/01ca69dd-d690-4ee2-808b-8367df863600)
+![Doctor's report page with a date range picker and a generated report showing summary statistics, top triggers, top symptoms, preventive medication log, and full headache entry table](https://github.com/user-attachments/assets/01ca69dd-d690-4ee2-808b-8367df863600)
 
 ## Features
 
