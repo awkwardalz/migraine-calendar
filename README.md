@@ -113,13 +113,18 @@ turso db tokens create migraine-calendar  # copy the token
 Create `.env` in the project root:
 
 ```env
-APP_USERNAME=alice
+APP_USERNAME=your-username
 APP_PASSWORD=your-password
 JWT_SECRET=a-long-random-secret
 PORT=3001
 
 TURSO_DATABASE_URL=libsql://your-db.turso.io
 TURSO_AUTH_TOKEN=your-token
+
+# Weather location (defaults to Hong Kong if omitted)
+# WEATHER_LAT=22.3193
+# WEATHER_LON=114.1694
+# WEATHER_TIMEZONE=Asia/Hong_Kong
 
 # Optional — override guest credentials
 # GUEST_USERNAME=guest
@@ -167,6 +172,9 @@ In **Site configuration → Environment variables**, add:
 | `TURSO_AUTH_TOKEN` | Token from `turso db tokens create` |
 | `GUEST_USERNAME` | *(optional)* Guest username (default: `guest`) |
 | `GUEST_PASSWORD` | *(optional)* Guest password (default: `guest`) |
+| `WEATHER_LAT` | *(optional)* Latitude for weather data (default: `22.3193`) |
+| `WEATHER_LON` | *(optional)* Longitude for weather data (default: `114.1694`) |
+| `WEATHER_TIMEZONE` | *(optional)* Timezone for weather data (default: `Asia/Hong_Kong`) |
 
 ### 4. Deploy
 

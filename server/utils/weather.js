@@ -1,7 +1,8 @@
 import db from '../db.js';
 
-const HK_LAT = 22.3193;
-const HK_LON = 114.1694;
+const WEATHER_LAT = parseFloat(process.env.WEATHER_LAT ?? '22.3193');
+const WEATHER_LON = parseFloat(process.env.WEATHER_LON ?? '114.1694');
+const WEATHER_TIMEZONE = process.env.WEATHER_TIMEZONE ?? 'Asia/Hong_Kong';
 
 export function weatherLabel(code) {
   if (code === 0)  return { icon: '\u2600\ufe0f', label: 'Clear' };
@@ -25,11 +26,11 @@ export async function fetchAndCacheWeather(dateStr, force = false) {
 
   try {
     const url = new URL('https://api.open-meteo.com/v1/forecast');
-    url.searchParams.set('latitude', HK_LAT);
-    url.searchParams.set('longitude', HK_LON);
+    url.searchParams.set('latitude', WEATHER_LAT);
+    url.searchParams.set('longitude', WEATHER_LON);
     url.searchParams.set('daily', ['temperature_2m_max','temperature_2m_min','precipitation_sum','weathercode'].join(','));
     url.searchParams.set('hourly', 'surface_pressure');
-    url.searchParams.set('timezone', 'Asia/Hong_Kong');
+    url.searchParams.set('timezone', WEATHER_TIMEZONE);
     url.searchParams.set('start_date', dateStr);
     url.searchParams.set('end_date', dateStr);
 
@@ -78,11 +79,11 @@ export async function fetchAndCacheWeather(dateStr, force = false) {
 // Returns array of raw day objects (no pressure_delta yet).
 async function fetchOpenMeteoRange(startDate, endDate) {
   const url = new URL('https://api.open-meteo.com/v1/forecast');
-  url.searchParams.set('latitude', HK_LAT);
-  url.searchParams.set('longitude', HK_LON);
+  url.searchParams.set('latitude', WEATHER_LAT);
+  url.searchParams.set('longitude', WEATHER_LON);
   url.searchParams.set('daily', ['temperature_2m_max','temperature_2m_min','precipitation_sum','weathercode'].join(','));
   url.searchParams.set('hourly', 'surface_pressure');
-  url.searchParams.set('timezone', 'Asia/Hong_Kong');
+  url.searchParams.set('timezone', WEATHER_TIMEZONE);
   url.searchParams.set('start_date', startDate);
   url.searchParams.set('end_date', endDate);
 
