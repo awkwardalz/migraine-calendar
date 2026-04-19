@@ -4,6 +4,29 @@ A personal migraine headache tracking web app with calendar visualization, stati
 
 **Live site:** [migraine-calendar on Netlify](https://migraine-calendar.netlify.app/)
 
+## Screenshots
+
+### Login
+![Login page](https://github.com/user-attachments/assets/ea46963e-a16f-4055-b7fd-934a029d86df)
+
+### Calendar Dashboard
+![Calendar dashboard with color-coded migraine days and weather overlay](https://github.com/user-attachments/assets/a98917c1-6b8d-4fcd-ae07-05dab195d926)
+
+### Day Detail
+![Clicking a day reveals its headache entry, weather data, and quick-log buttons](https://github.com/user-attachments/assets/976b4d71-b905-4fe4-b1ce-c7d79b45d950)
+
+### Headache Log Form
+![Headache logging form with location, intensity slider, symptoms, and triggers](https://github.com/user-attachments/assets/d23d0aa8-e6b3-45a2-b585-5ae7670af5db)
+
+### Preventive Medication Form
+![Preventive medication form with injectable and oral options](https://github.com/user-attachments/assets/972d3995-0444-4c72-a65f-ce58d8797792)
+
+### Entry History
+![Chronological history of all headache entries with inline tags](https://github.com/user-attachments/assets/385f574e-568d-4993-b504-7940dc63cd85)
+
+### Doctor's Report
+![Printable doctor's report with summary stats, top triggers, and weather context](https://github.com/user-attachments/assets/01ca69dd-d690-4ee2-808b-8367df863600)
+
 ## Features
 
 ### 📅 Calendar Dashboard
