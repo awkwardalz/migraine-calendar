@@ -107,10 +107,15 @@ export default function HeadacheForm() {
       };
       if (isEdit) {
         await api.updateHeadache(id, data);
+        navigate('/');
       } else {
         await api.createHeadache(data);
+        // Trigger weather fetch for the new headache date
+        await api.triggerWeatherFetch(data.date, data.date);
+        // Fire event so Dashboard reloads weather
+        window.dispatchEvent(new CustomEvent('weather-fetched'));
+        navigate('/');
       }
-      navigate('/');
     } catch (err) {
       setError(err.message);
     } finally {
